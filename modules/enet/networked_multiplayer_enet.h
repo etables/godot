@@ -114,6 +114,7 @@ private:
 	Ref<CryptoKey> dtls_key;
 	Ref<X509Certificate> dtls_cert;
 	bool dtls_verify;
+	String for_hostname;
 
 protected:
 	static void _bind_methods();
@@ -176,6 +177,8 @@ public:
 	bool is_dtls_verify_enabled() const;
 	void set_dtls_key(Ref<CryptoKey> p_key);
 	void set_dtls_certificate(Ref<X509Certificate> p_cert);
+	void set_hostname(String hostname);
+	String get_hostname() const;
 };
 
 VARIANT_ENUM_CAST(NetworkedMultiplayerENet::CompressionMode);
