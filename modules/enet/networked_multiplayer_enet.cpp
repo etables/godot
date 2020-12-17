@@ -165,7 +165,7 @@ Error NetworkedMultiplayerENet::create_client(const String &p_address, int p_por
 	ERR_FAIL_COND_V_MSG(!host, ERR_CANT_CREATE, "Couldn't create the ENet client host.");
 #ifdef GODOT_ENET
 	if (dtls_enabled) {
-		enet_host_dtls_client_setup(host, dtls_cert.ptr(), dtls_verify, p_address.utf8().get_data());
+		enet_host_dtls_client_setup(host, dtls_cert.ptr(), dtls_verify, for_hostname.utf8().get_data());
 	}
 	enet_host_refuse_new_connections(host, refuse_connections);
 #endif
@@ -882,6 +882,8 @@ void NetworkedMultiplayerENet::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_dtls_verify_enabled"), &NetworkedMultiplayerENet::is_dtls_verify_enabled);
 	ClassDB::bind_method(D_METHOD("get_peer_address", "id"), &NetworkedMultiplayerENet::get_peer_address);
 	ClassDB::bind_method(D_METHOD("get_peer_port", "id"), &NetworkedMultiplayerENet::get_peer_port);
+	ClassDB::bind_method(D_METHOD("set_hostname", "hostname"), &NetworkedMultiplayerENet::set_hostname);
+	ClassDB::bind_method(D_METHOD("get_hostname"), &NetworkedMultiplayerENet::get_hostname);
 
 	ClassDB::bind_method(D_METHOD("get_packet_channel"), &NetworkedMultiplayerENet::get_packet_channel);
 	ClassDB::bind_method(D_METHOD("get_last_packet_channel"), &NetworkedMultiplayerENet::get_last_packet_channel);
@@ -901,6 +903,7 @@ void NetworkedMultiplayerENet::_bind_methods() {
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "server_relay"), "set_server_relay_enabled", "is_server_relay_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "dtls_verify"), "set_dtls_verify_enabled", "is_dtls_verify_enabled");
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "use_dtls"), "set_dtls_enabled", "is_dtls_enabled");
+	ADD_PROPERTY(PropertyInfo(Variant::STRING, "for_hostname"), "set_hostname", "get_hostname");
 
 	BIND_ENUM_CONSTANT(COMPRESS_NONE);
 	BIND_ENUM_CONSTANT(COMPRESS_RANGE_CODER);
@@ -933,6 +936,7 @@ NetworkedMultiplayerENet::NetworkedMultiplayerENet() {
 
 	dtls_enabled = false;
 	dtls_verify = true;
+	for_hostname = String();
 }
 
 NetworkedMultiplayerENet::~NetworkedMultiplayerENet() {
@@ -971,6 +975,14 @@ bool NetworkedMultiplayerENet::is_dtls_verify_enabled() const {
 void NetworkedMultiplayerENet::set_dtls_key(Ref<CryptoKey> p_key) {
 	ERR_FAIL_COND(active);
 	dtls_key = p_key;
+}
+
+void NetworkedMultiplayerENet::set_hostname(String hostname) {
+	for_hostname = hostname;
+}
+
+String NetworkedMultiplayerENet::get_hostname() const {
+	return for_hostname;
 }
 
 void NetworkedMultiplayerENet::set_dtls_certificate(Ref<X509Certificate> p_cert) {
